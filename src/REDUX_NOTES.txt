@@ -1,0 +1,160 @@
+-------------------------------------------------------
+IMPORTANT!!!!
+
+Data Flow
+
+Data Flow with React-Redux
+
+1.) Store is created, which dispatches an initial action
+2.) Reducers returns the initial state
+3.) useSelector runs for all components connected to store
+4.) Provides the data for these components
+4.) Triggers render
+5.) On dispatch, any connected components that receive new data from useSelector will re-render
+
+
+How to Connect
+
+1.) Not every component needs useSelector and useDispatch!
+2.) Some will only need to read data
+3.) Some will only need to dispatch actions
+4.) If you’re mapping over an array to render components, continue to pass props directly from React
+5.) Sometimes passing props down will be easier than having useSelector everywhere
+
+store
+reducer
+action
+dispatch
+
+--------------------------------------------------------------
+Redux
+A library for state management
+
+Very useful for managing larger applications with quite a bit of state
+
+In Redux, the centralized place where state is stored is called a store
+
+1.) You can not create a store without specifying how to define initial state
+2.) The store also needs to know what changes to make to the state
+3.) We solve this problem by passing a function to the store.
+4.) That function is called a reducer
+
+Reducers
+
+1.) Reducers are functions
+2.) They accept two objects: a state and an action
+3.) They use the action to produce and return a new state object
+4.) They should be pure functions, i.e. they should not mutate their inputs (more on this later)
+
+Actions
+1.) Reducers are not called directly.
+2.) Instead, we fire off an action, which is intercepted and processed by a reducer
+3.) Redux actions are simple instructions that tell reducer(s) how to adjust state
+4.) They are objects and contain a type key
+5.) type is, by convention, a string in UPPER_SNAKE_CASE.
+
+=============
+Data lifecycle
+The data lifecycle in any Redux app follows these 4 steps:
+______________________________________
+1.) You call store.dispatch(action).
+2.) Redux store calls the reducer function you gave it.
+3.) Root reducer may combine output of multiple reducers into single state tree.
+4.) Redux store saves the complete state tree returned by the root reducer.
+________________________________________
+=============
+
+=============
+Connecting Components
+
+1.) We can access values from the store with the useSelector hook, useSelector accepts a callback
+2.) The callback has access to the store as its first argument
+3.) The callback should return whatever data we want from the store
+
+((((useSelector Example))))
+
+demo/counter/src/FirstCounter.js
+import React from "react";
+import { useSelector } from "react-redux";
+
+function FirstCounter() {
+  // let's pull in the value of count from the store
+  const count = useSelector(store => store.count);
+
+  return (
+    <div>
+      <h2>The count is: {count}.</h2>
+    </div>
+  );
+}
+
+export default FirstCounter;
+===============
+-------------------------------------------------------
+
+Dispatching to the Store
+
+1.) useSelector reads from the store, but what about making changes?
+2.) For this we can use another hook: useDispatch
+3.) useDispatch lets us dispatch actions to the store
+
+useDispatch Example
+
+demo/counter/src/SecondCounter.js
+import React from "react";
+import { useSelector, useDispatch } from "react-redux";
+
+function SecondCounter() {
+  const count = useSelector(store => store.count);
+  console.log("count=", count);
+
+  const dispatch = useDispatch();
+
+  function up(evt) { dispatch({ type: "INCREMENT" }); }
+  function down(evt) { dispatch({ type: "DECREMENT" }); }
+
+  return (
+    <div>
+      <h2>The count is: {count}.</h2>
+      <button onClick={up}> + </button>
+      <button onClick={down}> - </button>
+    </div>
+  );
+}
+
+export default SecondCounter;
+
+===============
+-----------------------------------------------------------
+
+One way to reduce re-renders
+
+ShallowEqual
+
+demo/selector-example/src/MathLessRenderingAlt.js
+import React from "react";
+import { useSelector, shallowEqual } from "react-redux";
+
+/* Generate arithmetic facts about numbers in the redux store. */
+function MathLessRenderingAlt() {
+  const { num1, num2 } = useSelector(
+    st => ({ num1: st.num1, num2: st.num2 }),
+    shallowEqual // does a shallow equality check on the values
+  );
+
+  console.log("MATH_LESS_RENDERING_ALT RENDERING");
+
+  return (
+    <div>
+      <div>
+        <h3>Math facts (also with less rendering)</h3>
+        <ul>
+          <li>Sum: {num1 + num2}</li>
+          <li>Difference: {num1 - num2}</li>
+          <li>Product: {num1 * num2}</li>
+          <li>Quotient: {num1 / num2}</li>
+        </ul>
+      </div>
+    </div>
+  );
+}
